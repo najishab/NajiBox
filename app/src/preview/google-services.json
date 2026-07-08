@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "645121730379",
+    "project_id": "najibox-b7c70",
+    "storage_bucket": "najibox-b7c70.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:645121730379:android:0cc88ada55147f92c42ace",
+        "android_client_info": {
+          "package_name": "io.najishab.najibox"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAXeywIkCsyVNbv2lCSVwvaAwwQQC3WC-g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
