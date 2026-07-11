@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="app_default_font" type="font">@font/najifont_fa</item>
+</resources>

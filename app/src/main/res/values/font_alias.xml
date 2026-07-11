@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Alias so themes.xml can reference @font/app_default_font and have it
+         automatically resolve to the right font per locale via values-fa/font_alias.xml -->
+    <item name="app_default_font" type="font">@font/najifont</item>
+</resources>
