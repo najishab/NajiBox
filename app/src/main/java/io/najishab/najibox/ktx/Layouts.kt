@@ -3,7 +3,9 @@ package io.najishab.najibox.ktx
 import android.graphics.Rect
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import io.najishab.najibox.R
 import io.najishab.najibox.database.DataStore
+import io.najishab.najibox.ui.ConfigurationFragment
 import io.najishab.najibox.ui.MainActivity
 
 class FixedLinearLayoutManager(val recyclerView: RecyclerView) :
@@ -34,13 +36,16 @@ class FixedLinearLayoutManager(val recyclerView: RecyclerView) :
             return scrollRange
         }
 
+        val fragment = activity.supportFragmentManager.findFragmentById(R.id.fragment_holder) as? ConfigurationFragment
+        val fab = fragment?.fab ?: return scrollRange
+
         val overscroll = dx - scrollRange
         if (overscroll > 0) {
             val view =
                 (recyclerView.findViewHolderForAdapterPosition(findLastVisibleItemPosition())
                     ?: return scrollRange).itemView
             val itemLocation = Rect().also { view.getGlobalVisibleRect(it) }
-            val fabLocation = Rect().also { activity.binding.fab.getGlobalVisibleRect(it) }
+            val fabLocation = Rect().also { fab.getGlobalVisibleRect(it) }
             if (!itemLocation.contains(fabLocation.left, fabLocation.top) && !itemLocation.contains(
                     fabLocation.right,
                     fabLocation.bottom
@@ -48,25 +53,9 @@ class FixedLinearLayoutManager(val recyclerView: RecyclerView) :
             ) {
                 return scrollRange
             }
-            activity.binding.fab.apply {
-                if (isShown) hide()
-            }
+            if (fab.isShown) fab.hide()
         } else {
-            /*val screen = Rect().also { activity.window.decorView.getGlobalVisibleRect(it) }
-            val location = Rect().also { activity.stats.getGlobalVisibleRect(it) }
-            if (screen.bottom < location.bottom) {
-                return scrollRange
-            }
-            val height = location.bottom - location.top
-            val mH = activity.stats.measuredHeight
-
-            if (mH > height) {
-                return scrollRange
-            }*/
-
-            activity.binding.fab.apply {
-                if (!isShown) show()
-            }
+            if (!fab.isShown) fab.show()
         }
         return scrollRange
     }

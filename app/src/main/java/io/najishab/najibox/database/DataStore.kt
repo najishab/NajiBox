@@ -46,7 +46,7 @@ object DataStore : OnPreferenceDataStoreChangeListener {
 
     fun currentGroupId(): Long {
         val currentSelected = configurationStore.getLong(Key.PROFILE_GROUP, -1)
-        if (currentSelected > 0L) return currentSelected
+        if (currentSelected > 0L || currentSelected == ProxyGroup.ALL_GROUP_ID) return currentSelected
         val groups = SagerDatabase.groupDao.allGroups()
         if (groups.isNotEmpty()) {
             val groupId = groups[0].id
@@ -61,6 +61,9 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     fun currentGroup(): ProxyGroup {
         var group: ProxyGroup? = null
         val currentSelected = configurationStore.getLong(Key.PROFILE_GROUP, -1)
+        if (currentSelected == ProxyGroup.ALL_GROUP_ID) {
+            return ProxyGroup.allGroup()
+        }
         if (currentSelected > 0L) {
             group = SagerDatabase.groupDao.getById(currentSelected)
         }
@@ -79,7 +82,7 @@ object DataStore : OnPreferenceDataStoreChangeListener {
 
     fun selectedGroupForImport(): Long {
         val current = currentGroup()
-        if (current.type == GroupType.BASIC) return current.id
+        if (current.type == GroupType.BASIC && current.id != ProxyGroup.ALL_GROUP_ID) return current.id
         val groups = SagerDatabase.groupDao.allGroups()
         return groups.find { it.type == GroupType.BASIC }!!.id
     }
@@ -156,7 +159,7 @@ object DataStore : OnPreferenceDataStoreChangeListener {
 
     var appendHttpProxy by configurationStore.boolean(Key.APPEND_HTTP_PROXY)
     var connectionTestURL by configurationStore.string(Key.CONNECTION_TEST_URL) { CONNECTION_TEST_URL }
-    var connectionTestConcurrent by configurationStore.int("connectionTestConcurrent") { 5 }
+    var connectionTestConcurrent by configurationStore.int("connectionTestConcurrent") { 50 }
     var alwaysShowAddress by configurationStore.boolean(Key.ALWAYS_SHOW_ADDRESS)
 
     var tunImplementation by configurationStore.stringToInt(Key.TUN_IMPLEMENTATION) { TunImplementation.GVISOR }

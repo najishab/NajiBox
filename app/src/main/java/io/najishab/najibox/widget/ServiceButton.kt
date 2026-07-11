@@ -52,7 +52,7 @@ class ServiceButton @JvmOverloads constructor(
         fun start() {
             setImageDrawable(icon)
             icon.start()
-            progress.onStart()
+            progress?.onStart()
         }
 
         fun stop() = icon.stop()
@@ -80,7 +80,7 @@ class ServiceButton @JvmOverloads constructor(
 
     private var checked = false
     private var delayedAnimation: Job? = null
-    private lateinit var progress: BaseProgressIndicator<*>
+    private var progress: BaseProgressIndicator<*>? = null
     fun initProgress(progress: BaseProgressIndicator<*>) {
         this.progress = progress
         progress.progressDrawable?.addSpringAnimationEndListener(this)
@@ -90,12 +90,12 @@ class ServiceButton @JvmOverloads constructor(
         animation: DynamicAnimation<out DynamicAnimation<*>>?, canceled: Boolean, value: Float,
         velocity: Float
     ) {
-        if (!canceled) progress.hide()
+        if (!canceled) progress?.hide()
     }
 
     private fun hideProgress() {
         delayedAnimation?.cancel()
-        progress.hide()
+        progress?.hide()
     }
 
     override fun onCreateDrawableState(extraSpace: Int): IntArray {

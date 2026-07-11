@@ -40,6 +40,7 @@ import io.najishab.najibox.GroupType
 import io.najishab.najibox.Key
 import io.najishab.najibox.R
 import io.najishab.najibox.SagerNet
+import io.najishab.najibox.aidl.SpeedDisplayData
 import io.najishab.najibox.aidl.TrafficData
 import io.najishab.najibox.bg.BaseService
 import io.najishab.najibox.bg.proto.UrlTest
@@ -65,6 +66,7 @@ import io.najishab.najibox.ktx.dp2px
 import io.najishab.najibox.ktx.getColorAttr
 import io.najishab.najibox.ktx.getColour
 import io.najishab.najibox.ktx.isIpAddress
+import io.najishab.najibox.ktx.launchCustomTab
 import io.najishab.najibox.ktx.onMainDispatcher
 import io.najishab.najibox.ktx.readableMessage
 import io.najishab.najibox.ktx.runOnDefaultDispatcher
@@ -90,6 +92,7 @@ import io.najishab.najibox.ui.profile.TuicSettingsActivity
 import io.najishab.najibox.ui.profile.VMessSettingsActivity
 import io.najishab.najibox.ui.profile.WireGuardSettingsActivity
 import io.najishab.najibox.widget.QRCodeDialog
+import io.najishab.najibox.widget.ServiceButton
 import io.najishab.najibox.widget.UndoSnackbarManager
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
@@ -128,6 +131,8 @@ class ConfigurationFragment @JvmOverloads constructor(
     lateinit var adapter: GroupPagerAdapter
     lateinit var tabLayout: TabLayout
     lateinit var groupPager: ViewPager2
+    lateinit var fab: ServiceButton
+    lateinit var statusView: TextView
 
     val alwaysShowAddress by lazy { DataStore.alwaysShowAddress }
 
@@ -248,6 +253,89 @@ class ConfigurationFragment @JvmOverloads constructor(
         }
 
         DataStore.profileCacheStore.registerChangeListener(this)
+
+        view.findViewById<View>(R.id.btn_test).setOnClickListener {
+            urlTest()
+        }
+
+        view.findViewById<View>(R.id.btn_myip).setOnClickListener {
+            requireContext().launchCustomTab("https://ipdata.co")
+        }
+
+        fab = view.findViewById(R.id.fab)
+        statusView = view.findViewById(R.id.status)
+
+        fab.setOnClickListener {
+            (requireActivity() as MainActivity).toggleConnection()
+        }
+        statusView.setOnClickListener {
+            if (DataStore.serviceState.connected) testConnectionQuick()
+        }
+
+        changeState(DataStore.serviceState, false)
+    }
+
+    fun setStatus(text: CharSequence) {
+        if (::statusView.isInitialized) statusView.text = text
+    }
+
+    fun changeState(state: BaseService.State, animate: Boolean) {
+        if (!::fab.isInitialized) return
+        fab.changeState(state, state, animate)
+        setStatus(
+            getString(
+                when (state) {
+                    BaseService.State.Connected -> R.string.vpn_connected
+                    BaseService.State.Connecting -> R.string.connecting
+                    BaseService.State.Stopping -> R.string.stopping
+                    else -> R.string.not_connected
+                }
+            )
+        )
+    }
+
+    @SuppressLint("SetTextI18n")
+    fun updateSpeed(stats: SpeedDisplayData) {
+        if (!::statusView.isInitialized || DataStore.serviceState != BaseService.State.Connected) return
+        statusView.text = "▲ ${
+            getString(
+                R.string.speed, Formatter.formatFileSize(requireContext(), stats.txRateProxy)
+            )
+        }  ▼ ${
+            getString(
+                R.string.speed, Formatter.formatFileSize(requireContext(), stats.rxRateProxy)
+            )
+        }"
+    }
+
+    fun testConnectionQuick() {
+        val activity = requireActivity() as MainActivity
+        fab.isEnabled = false
+        setStatus(getString(R.string.connection_test_testing))
+        runOnDefaultDispatcher {
+            try {
+                val elapsed = activity.urlTest()
+                onMainDispatcher {
+                    fab.isEnabled = true
+                    setStatus(
+                        getString(
+                            if (DataStore.connectionTestURL.startsWith("https://")) {
+                                R.string.connection_test_available
+                            } else {
+                                R.string.connection_test_available_http
+                            }, elapsed
+                        )
+                    )
+                }
+            } catch (e: Exception) {
+                Logs.w(e.toString())
+                onMainDispatcher {
+                    fab.isEnabled = true
+                    changeState(DataStore.serviceState, false)
+                    snackbar(getString(R.string.connection_test_error, e.readableMessage)).show()
+                }
+            }
+        }
     }
 
     override fun onPreferenceDataStoreChanged(store: PreferenceDataStore, key: String) {
@@ -626,6 +714,7 @@ class ConfigurationFragment @JvmOverloads constructor(
         suspend fun update(profile: ProxyEntity) {
             try {
                 ProfileManager.updateProfile(profile)
+                GroupManager.postReload(profile.groupId) // <--- show Fast urlTest & pingTest
             } catch (e: Exception) {
                 Logs.w(e)
             }
@@ -655,7 +744,7 @@ class ConfigurationFragment @JvmOverloads constructor(
     fun pingTest(icmpPing: Boolean) {
         if (DataStore.runningTest) return else DataStore.runningTest = true
         val test = TestDialog()
-        val dialog = test.builder.show()
+        val dialog = test.builder.create()
         val testJobs = mutableListOf<Job>()
         val group = DataStore.currentGroup()
 
@@ -789,7 +878,7 @@ class ConfigurationFragment @JvmOverloads constructor(
     fun urlTest() {
         if (DataStore.runningTest) return else DataStore.runningTest = true
         val test = TestDialog()
-        val dialog = test.builder.show()
+        val dialog = test.builder.create()
         val testJobs = mutableListOf<Job>()
         val group = DataStore.currentGroup()
 
@@ -1187,6 +1276,11 @@ class ConfigurationFragment @JvmOverloads constructor(
             var configurationIdList: MutableList<Long> = mutableListOf()
             val configurationList = HashMap<Long, ProxyEntity>()
 
+            // Only auto-scroll to top on the very first load; subsequent reloads
+            // (e.g. triggered per-profile during a connection test via
+            // GroupManager.postReload) must not fight the user's manual scroll.
+            private var initialLoadDone = false
+
             private fun getItem(profileId: Long): ProxyEntity {
                 var profile = configurationList[profileId]
                 if (profile == null) {
@@ -1414,11 +1508,16 @@ class ConfigurationFragment @JvmOverloads constructor(
                     configurationIdList.addAll(newProfileIds)
                     notifyDataSetChanged()
 
-                    if (selectedProfileIndex != -1) {
-                        configurationListView.scrollTo(selectedProfileIndex, true)
-                    } else if (newProfiles.isNotEmpty()) {
-                        configurationListView.scrollTo(0, true)
+                    // Only auto-scroll on the very first load. Reloads triggered mid-test
+                    // (one per profile finishing) must not fight the user's manual scroll.
+                    if (!initialLoadDone) {
+                        if (selectedProfileIndex != -1) {
+                            configurationListView.scrollTo(selectedProfileIndex, true)
+                        } else if (newProfiles.isNotEmpty()) {
+                            configurationListView.scrollTo(0, true)
+                        }
                     }
+                    initialLoadDone = true
 
                 }
             }

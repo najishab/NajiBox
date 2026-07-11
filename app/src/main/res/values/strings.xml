@@ -48,6 +48,8 @@
     <string name="group_delete_confirm_prompt">Are you sure you want to remove this group?</string>
     <string name="group_added">Added: \n%s</string>
     <string name="group_changed">Updated: \n%s</string>
+    <string name="bottom_menu_test">SpeedTest</string>
+    <string name="bottom_menu_myip">myIP</string>
     <string name="group_deleted">Deleted: \n%s</string>
     <string name="group_duplicate">Duplicate: \n%s</string>
     <!-- misc -->

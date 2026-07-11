@@ -129,7 +129,10 @@ data class ProxyGroup(
     companion object {
         // Virtual aggregate group that shows every proxy across every real group
         // (subscriptions + the default group). It is never persisted to the database.
-        const val ALL_GROUP_ID = -1L
+        // NOTE: must NOT be -1L — DataStore.currentGroupId()/currentGroup() treat -1
+        // as the "nothing selected yet" sentinel and will silently fall back to the
+        // first real group, ignoring the All group entirely.
+        const val ALL_GROUP_ID = -2L
 
         fun allGroup(): ProxyGroup {
             return ProxyGroup(

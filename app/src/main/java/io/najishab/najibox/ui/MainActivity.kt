@@ -63,7 +63,6 @@ class MainActivity : ThemedActivity(),
         super.onCreate(savedInstanceState)
 
         binding = LayoutMainBinding.inflate(layoutInflater)
-        binding.fab.initProgress(binding.fabProgress)
         if (themeResId !in intArrayOf(
                 R.style.Theme_SagerNet_Black
             )
@@ -86,13 +85,6 @@ class MainActivity : ThemedActivity(),
                 displayFragmentWithId(R.id.nav_configuration)
             }
         }
-
-        binding.fab.setOnClickListener {
-            if (DataStore.serviceState.canStop) SagerNet.stopService() else connect.launch(
-                null
-            )
-        }
-        binding.stats.setOnClickListener { if (DataStore.serviceState.connected) binding.stats.testConnection() }
 
         setContentView(binding.root)
         changeState(BaseService.State.Idle)
@@ -336,14 +328,6 @@ class MainActivity : ThemedActivity(),
 
     @SuppressLint("CommitTransaction")
     fun displayFragment(fragment: ToolbarFragment) {
-        if (fragment is ConfigurationFragment) {
-            binding.stats.allowShow = true
-            binding.fab.show()
-        } else if (!DataStore.showBottomBar) {
-            binding.stats.allowShow = false
-            binding.stats.performHide()
-            binding.fab.hide()
-        }
         supportFragmentManager.beginTransaction()
             .replace(R.id.fragment_holder, fragment)
             .commitAllowingStateLoss()
@@ -386,18 +370,13 @@ class MainActivity : ThemedActivity(),
     ) {
         DataStore.serviceState = state
 
-        binding.fab.changeState(state, DataStore.serviceState, animate)
-        binding.stats.changeState(state)
+        (supportFragmentManager.findFragmentById(R.id.fragment_holder) as? ConfigurationFragment)
+            ?.changeState(state, animate)
         if (msg != null) snackbar(getString(R.string.vpn_error, msg)).show()
     }
 
     override fun snackbarInternal(text: CharSequence): Snackbar {
-        return Snackbar.make(binding.coordinator, text, Snackbar.LENGTH_LONG).apply {
-            if (binding.fab.isShown) {
-                anchorView = binding.fab
-            }
-            // TODO
-        }
+        return Snackbar.make(binding.coordinator, text, Snackbar.LENGTH_LONG)
     }
 
     override fun stateChanged(state: BaseService.State, profileName: String?, msg: String?) {
@@ -423,10 +402,15 @@ class MainActivity : ThemedActivity(),
         if (it) snackbar(R.string.vpn_permission_denied).show()
     }
 
+    fun toggleConnection() {
+        if (DataStore.serviceState.canStop) SagerNet.stopService() else connect.launch(null)
+    }
+
     // may NOT called when app is in background
     // ONLY do UI update here, write DB in bg process
     override fun cbSpeedUpdate(stats: SpeedDisplayData) {
-        binding.stats.updateSpeed(stats.txRateProxy, stats.rxRateProxy)
+        (supportFragmentManager.findFragmentById(R.id.fragment_holder) as? ConfigurationFragment)
+            ?.updateSpeed(stats)
     }
 
     override fun cbTrafficUpdate(data: TrafficData) {
