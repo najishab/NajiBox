@@ -22,6 +22,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.content.IntentCompat
 import androidx.core.os.BundleCompat
 import androidx.core.net.toUri
+import androidx.core.view.ViewCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.core.view.size
@@ -91,6 +92,7 @@ import io.najishab.najibox.ui.profile.TrojanSettingsActivity
 import io.najishab.najibox.ui.profile.TuicSettingsActivity
 import io.najishab.najibox.ui.profile.VMessSettingsActivity
 import io.najishab.najibox.ui.profile.WireGuardSettingsActivity
+import io.najishab.najibox.widget.ListListener
 import io.najishab.najibox.widget.QRCodeDialog
 import io.najishab.najibox.widget.ServiceButton
 import io.najishab.najibox.widget.UndoSnackbarManager
@@ -133,6 +135,9 @@ class ConfigurationFragment @JvmOverloads constructor(
     lateinit var groupPager: ViewPager2
     lateinit var fab: ServiceButton
     lateinit var statusView: TextView
+    lateinit var speedLayout: View
+    lateinit var txSpeedView: TextView
+    lateinit var rxSpeedView: TextView
 
     val alwaysShowAddress by lazy { DataStore.alwaysShowAddress }
 
@@ -186,6 +191,8 @@ class ConfigurationFragment @JvmOverloads constructor(
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        ViewCompat.setOnApplyWindowInsetsListener(view, ListListener)
 
         if (!select) {
             toolbar.inflateMenu(R.menu.add_profile_menu)
@@ -264,6 +271,9 @@ class ConfigurationFragment @JvmOverloads constructor(
 
         fab = view.findViewById(R.id.fab)
         statusView = view.findViewById(R.id.status)
+        speedLayout = view.findViewById(R.id.speed_layout)
+        txSpeedView = view.findViewById(R.id.tx_speed)
+        rxSpeedView = view.findViewById(R.id.rx_speed)
 
         fab.setOnClickListener {
             (requireActivity() as MainActivity).toggleConnection()
@@ -282,6 +292,7 @@ class ConfigurationFragment @JvmOverloads constructor(
     fun changeState(state: BaseService.State, animate: Boolean) {
         if (!::fab.isInitialized) return
         fab.changeState(state, state, animate)
+        if (::speedLayout.isInitialized) speedLayout.isVisible = state == BaseService.State.Connected
         setStatus(
             getString(
                 when (state) {
@@ -296,12 +307,16 @@ class ConfigurationFragment @JvmOverloads constructor(
 
     @SuppressLint("SetTextI18n")
     fun updateSpeed(stats: SpeedDisplayData) {
-        if (!::statusView.isInitialized || DataStore.serviceState != BaseService.State.Connected) return
-        statusView.text = "▲ ${
+        if (!::statusView.isInitialized) return
+        val connected = DataStore.serviceState == BaseService.State.Connected
+        if (::speedLayout.isInitialized) speedLayout.isVisible = connected
+        if (!connected) return
+        txSpeedView.text = "▲ ${
             getString(
                 R.string.speed, Formatter.formatFileSize(requireContext(), stats.txRateProxy)
             )
-        }  ▼ ${
+        }"
+        rxSpeedView.text = "▼ ${
             getString(
                 R.string.speed, Formatter.formatFileSize(requireContext(), stats.rxRateProxy)
             )
@@ -714,7 +729,6 @@ class ConfigurationFragment @JvmOverloads constructor(
         suspend fun update(profile: ProxyEntity) {
             try {
                 ProfileManager.updateProfile(profile)
-                GroupManager.postReload(profile.groupId) // <--- show Fast urlTest & pingTest
             } catch (e: Exception) {
                 Logs.w(e)
             }
@@ -742,9 +756,10 @@ class ConfigurationFragment @JvmOverloads constructor(
     @OptIn(DelicateCoroutinesApi::class)
     @Suppress("EXPERIMENTAL_API_USAGE")
     fun pingTest(icmpPing: Boolean) {
-        if (DataStore.runningTest) return else DataStore.runningTest = true
+        if (!isAdded || DataStore.runningTest) return else DataStore.runningTest = true
         val test = TestDialog()
         val dialog = test.builder.create()
+        dialog.show()
         val testJobs = mutableListOf<Job>()
         val group = DataStore.currentGroup()
 
@@ -876,9 +891,10 @@ class ConfigurationFragment @JvmOverloads constructor(
 
     @OptIn(DelicateCoroutinesApi::class)
     fun urlTest() {
-        if (DataStore.runningTest) return else DataStore.runningTest = true
+        if (!isAdded || DataStore.runningTest) return else DataStore.runningTest = true
         val test = TestDialog()
         val dialog = test.builder.create()
+        dialog.show()
         val testJobs = mutableListOf<Job>()
         val group = DataStore.currentGroup()
 
@@ -1405,9 +1421,6 @@ class ConfigurationFragment @JvmOverloads constructor(
                 val index = configurationIdList.indexOf(profile.id)
                 if (index < 0) return
                 configurationListView.post {
-                    if (::undoManager.isInitialized) {
-                        undoManager.flush()
-                    }
                     configurationList[profile.id] = profile
                     notifyItemChanged(index)
                     //
@@ -1470,7 +1483,9 @@ class ConfigurationFragment @JvmOverloads constructor(
 
             override suspend fun groupUpdated(groupId: Long) {
                 if (groupId != proxyGroup.id) return
-                proxyGroup = SagerDatabase.groupDao.getById(groupId)!!
+                if (proxyGroup.id != ProxyGroup.ALL_GROUP_ID) {
+                    proxyGroup = SagerDatabase.groupDao.getById(groupId) ?: return
+                }
                 reloadProfiles()
             }
 

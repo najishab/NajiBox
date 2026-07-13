@@ -29,6 +29,7 @@ import io.najishab.najibox.fmt.tuic.TuicBean
 import io.najishab.najibox.fmt.tuic.toUri
 import io.najishab.najibox.fmt.v2ray.*
 import io.najishab.najibox.fmt.wireguard.WireGuardBean
+import io.najishab.najibox.fmt.wireguard.toUri
 import io.najishab.najibox.ktx.app
 import io.najishab.najibox.ui.profile.*
 import moe.manooch.najib4x.SingBoxOptions.MultiplexOptions
@@ -257,6 +258,7 @@ data class ProxyEntity(
             is HysteriaBean -> toUri()
             is TuicBean -> toUri()
             is AnyTLSBean -> toUri()
+            is WireGuardBean -> toUri()
             is NekoBean -> ""
             else -> toUniversalLink()
         }

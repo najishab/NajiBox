@@ -14,6 +14,7 @@ import io.najishab.najibox.fmt.trojan.parseTrojan
 import io.najishab.najibox.fmt.tuic.parseTuic
 import io.najishab.najibox.fmt.trojan_go.parseTrojanGo
 import io.najishab.najibox.fmt.v2ray.parseV2Ray
+import io.najishab.najibox.fmt.wireguard.parseWireGuard
 import moe.manooch.najib4x.proxy.anytls.parseAnytls
 import moe.manooch.najib4x.utils.JavaUtil.gson
 import moe.manooch.najib4x.utils.Util
@@ -214,6 +215,13 @@ suspend fun parseProxies(text: String): List<AbstractBean> {
             Logs.d("Try parse anytls link: $this")
             runCatching {
                 entities.add(parseAnytls(this))
+            }.onFailure {
+                Logs.w(it)
+            }
+        } else if (startsWith("wireguard://") || startsWith("wg://")) {
+            Logs.d("Try parse wireguard link: $this")
+            runCatching {
+                entities.add(parseWireGuard(this))
             }.onFailure {
                 Logs.w(it)
             }

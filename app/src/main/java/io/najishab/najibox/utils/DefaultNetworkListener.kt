@@ -31,6 +31,7 @@ object DefaultNetworkListener {
         class Lost(val network: Network) : NetworkMessage()
     }
 
+    @OptIn(kotlinx.coroutines.ObsoleteCoroutinesApi::class, kotlinx.coroutines.DelicateCoroutinesApi::class)
     private val networkActor = GlobalScope.actor<NetworkMessage>(Dispatchers.Unconfined) {
         val listeners = mutableMapOf<Any, (Network?) -> Unit>()
         var network: Network? = null

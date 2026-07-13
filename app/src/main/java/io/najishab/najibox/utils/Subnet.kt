@@ -78,8 +78,9 @@ class Subnet(val address: InetAddress, val prefixSize: Int) : Comparable<Subnet>
     }
 
     override fun equals(other: Any?): Boolean {
-        val that = other as? Subnet
-        return address == that?.address && prefixSize == that.prefixSize
+        if (this === other) return true
+        if (other !is Subnet) return false
+        return address == other.address && prefixSize == other.prefixSize
     }
 
     override fun hashCode(): Int = Objects.hash(address, prefixSize)

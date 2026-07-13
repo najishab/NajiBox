@@ -24,6 +24,7 @@ import moe.manooch.najib4x.Protocols
 import moe.manooch.najib4x.proxy.anytls.AnyTLSBean
 import moe.manooch.najib4x.proxy.config.ConfigBean
 import moe.manooch.najib4x.utils.Util
+import org.ini4j.Config
 import org.ini4j.Ini
 import org.json.JSONArray
 import org.json.JSONObject
@@ -676,7 +677,7 @@ object RawUpdater : GroupUpdater() {
             } catch (e: YAMLException) {
                 Logs.w(e)
             }
-        } else if (text.contains("[Interface]")) {
+        } else if (text.contains("[Interface]", ignoreCase = true)) {
             // wireguard
             try {
                 proxies.addAll(parseWireGuard(text).map {
@@ -720,19 +721,22 @@ object RawUpdater : GroupUpdater() {
     }
 
     fun parseWireGuard(conf: String): List<WireGuardBean> {
-        val ini = Ini(StringReader(conf))
-        val iface = ini["Interface"] ?: error("Missing 'Interface' selection")
+        val ini = Ini()
+        ini.config.isLowerCaseSection = true
+        ini.config.isLowerCaseOption = true
+        ini.load(StringReader(conf))
+        val iface = ini["interface"] ?: error("Missing 'Interface' selection")
         val bean = WireGuardBean().applyDefaultValues()
-        val localAddresses = iface.getAll("Address")
+        val localAddresses = iface.getAll("address")
         if (localAddresses.isNullOrEmpty()) error("Empty address in 'Interface' selection")
         bean.localAddress = localAddresses.flatMap { it.split(",") }.joinToString("\n")
-        bean.privateKey = iface["PrivateKey"]
-        bean.mtu = iface["MTU"]?.toIntOrNull()
-        val peers = ini.getAll("Peer")
+        bean.privateKey = iface["privatekey"]
+        bean.mtu = iface["mtu"]?.toIntOrNull()
+        val peers = ini.getAll("peer")
         if (peers.isNullOrEmpty()) error("Missing 'Peer' selections")
         val beans = mutableListOf<WireGuardBean>()
         for (peer in peers) {
-            val endpoint = peer["Endpoint"]
+            val endpoint = peer["endpoint"]
             if (endpoint.isNullOrBlank() || !endpoint.contains(":")) {
                 continue
             }
@@ -740,8 +744,8 @@ object RawUpdater : GroupUpdater() {
             val peerBean = bean.clone()
             peerBean.serverAddress = endpoint.substringBeforeLast(":")
             peerBean.serverPort = endpoint.substringAfterLast(":").toIntOrNull() ?: continue
-            peerBean.peerPublicKey = peer["PublicKey"] ?: continue
-            peerBean.peerPreSharedKey = peer["PresharedKey"]
+            peerBean.peerPublicKey = peer["publickey"] ?: continue
+            peerBean.peerPreSharedKey = peer["presharedkey"]
             beans.add(peerBean.applyDefaultValues())
         }
         if (beans.isEmpty()) error("Empty available peer list")

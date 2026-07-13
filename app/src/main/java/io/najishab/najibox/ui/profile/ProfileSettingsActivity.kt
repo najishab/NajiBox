@@ -162,7 +162,8 @@ abstract class ProfileSettingsActivity<T : AbstractBean>(
 
     }
 
-    val child by lazy { supportFragmentManager.findFragmentById(R.id.settings) as MyPreferenceFragmentCompat }
+    val child: MyPreferenceFragmentCompat?
+        get() = supportFragmentManager.findFragmentById(R.id.settings) as? MyPreferenceFragmentCompat
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.profile_config_menu, menu)
@@ -184,7 +185,7 @@ abstract class ProfileSettingsActivity<T : AbstractBean>(
         return true
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean = child.onOptionsItemSelected(item)
+    override fun onOptionsItemSelected(item: MenuItem): Boolean = child?.onOptionsItemSelected(item) ?: false
 
     override fun onSupportNavigateUp(): Boolean {
         if (!super.onSupportNavigateUp()) finish()

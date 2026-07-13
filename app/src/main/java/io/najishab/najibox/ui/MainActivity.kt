@@ -42,7 +42,6 @@ import io.najishab.najibox.fmt.PluginEntry
 import io.najishab.najibox.group.GroupInterfaceAdapter
 import io.najishab.najibox.group.GroupUpdater
 import io.najishab.najibox.ktx.alert
-import io.najishab.najibox.ktx.isPlay
 import io.najishab.najibox.ktx.isPreview
 import io.najishab.najibox.ktx.launchCustomTab
 import io.najishab.najibox.ktx.onMainDispatcher
@@ -122,7 +121,6 @@ class MainActivity : ThemedActivity(),
     fun refreshNavMenu(clashApi: Boolean) {
         if (::navigation.isInitialized) {
             navigation.menu.findItem(R.id.nav_traffic)?.isVisible = clashApi
-            navigation.menu.findItem(R.id.nav_tuiguang)?.isVisible = !isPlay
         }
     }
 
@@ -347,15 +345,11 @@ class MainActivity : ThemedActivity(),
             R.id.nav_tools -> displayFragment(ToolsFragment())
             R.id.nav_logcat -> displayFragment(LogcatFragment())
             R.id.nav_faq -> {
-                launchCustomTab("https://matsuridayo.github.io/")
+                launchCustomTab("https://najishab.github.io/")
                 return false
             }
 
             R.id.nav_about -> displayFragment(AboutFragment())
-            R.id.nav_tuiguang -> {
-                launchCustomTab("https://neko-box.pages.dev/喵")
-                return false
-            }
 
             else -> return false
         }

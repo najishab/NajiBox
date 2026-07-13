@@ -337,6 +337,7 @@ class AssetsActivity : ThemedActivity() {
         return true
     }
 
+    @Suppress("DEPRECATION")
     override fun onBackPressed() {
         finish()
     }

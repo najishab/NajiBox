@@ -62,6 +62,7 @@ class ServiceButton @JvmOverloads constructor(
     private val iconConnecting by lazy {
         AnimatedState(R.drawable.ic_service_connecting) {
             hideProgress()
+            @Suppress("DEPRECATION")
             delayedAnimation = (context as LifecycleOwner).lifecycleScope.launchWhenStarted {
                 delay(context.resources.getInteger(android.R.integer.config_mediumAnimTime) + 1000L)
                 isIndeterminate = true
