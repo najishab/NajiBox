@@ -29,6 +29,7 @@ import io.najishab.najibox.ktx.KryosKt;
 import io.najishab.najibox.ktx.Logs;
 import moe.manooch.najib4x.proxy.config.ConfigBean;
 import moe.manooch.najib4x.proxy.neko.NekoBean;
+import moe.manooch.najib4x.proxy.openvpn.OpenVpnBean;
 import moe.manooch.najib4x.utils.JavaUtil;
 
 public class KryoConverters {
@@ -166,6 +167,12 @@ public class KryoConverters {
     public static SubscriptionBean subscriptionDeserialize(byte[] bytes) {
         if (JavaUtil.isEmpty(bytes)) return null;
         return deserialize(new SubscriptionBean(), bytes);
+    }
+
+    @TypeConverter
+    public static OpenVpnBean openVpnDeserialize(byte[] bytes) {
+        if (JavaUtil.isEmpty(bytes)) return null;
+        return deserialize(new OpenVpnBean(), bytes);
     }
 
 }
