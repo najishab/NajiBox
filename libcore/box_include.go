@@ -25,6 +25,7 @@ import (
 	"github.com/sagernet/sing-box/protocol/hysteria"
 	"github.com/sagernet/sing-box/protocol/hysteria2"
 	"github.com/sagernet/sing-box/protocol/mixed"
+	"github.com/sagernet/sing-box/protocol/openvpn"
 	"github.com/sagernet/sing-box/protocol/redirect"
 	"github.com/sagernet/sing-box/protocol/shadowsocks"
 	"github.com/sagernet/sing-box/protocol/shadowtls"
@@ -84,6 +85,7 @@ func najiboxAndroidOutboundRegistry() *outbound.Registry {
 	hysteria2.RegisterOutbound(registry)
 
 	wireguard.RegisterOutbound(registry)
+	openvpn.RegisterOutbound(registry)
 
 	return registry
 }
