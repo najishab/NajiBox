@@ -182,6 +182,9 @@
             android:name="io.najishab.najibox.ui.profile.WireGuardSettingsActivity"
             android:configChanges="uiMode" />
         <activity
+            android:name="io.najishab.najibox.ui.profile.OpenVpnSettingsActivity"
+            android:configChanges="uiMode" />
+        <activity
             android:name="io.najishab.najibox.ui.profile.TuicSettingsActivity"
             android:configChanges="uiMode" />
         <activity

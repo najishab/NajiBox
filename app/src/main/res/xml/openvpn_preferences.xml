@@ -1,0 +1,94 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <EditTextPreference
+        app:icon="@drawable/ic_social_emoji_symbols"
+        app:key="name"
+        app:title="@string/profile_name"
+        app:useSimpleSummaryProvider="true" />
+
+    <PreferenceCategory app:title="@string/proxy_cat">
+        <EditTextPreference
+            app:icon="@drawable/ic_hardware_router"
+            app:key="serverAddress"
+            app:title="@string/server_address"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:icon="@drawable/ic_maps_directions_boat"
+            app:key="serverPort"
+            app:title="@string/server_port"
+            app:useSimpleSummaryProvider="true" />
+        <moe.manooch.najib4x.ui.SimpleMenuPreference
+            app:defaultValue="udp"
+            app:entries="@array/openvpn_protocol_entry"
+            app:entryValues="@array/openvpn_protocol_value"
+            app:icon="@drawable/ic_baseline_compare_arrows_24"
+            app:key="protocol"
+            app:title="@string/openvpn_protocol"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:icon="@drawable/ic_baseline_person_24"
+            app:key="username"
+            app:title="@string/username_opt"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:dialogLayout="@layout/layout_password_dialog"
+            app:icon="@drawable/ic_settings_password"
+            app:key="password"
+            app:title="@string/password_opt" />
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/certificates">
+        <EditTextPreference
+            app:dialogLayout="@layout/layout_multiline_dialog"
+            app:icon="@drawable/ic_action_copyright"
+            app:key="caCertificate"
+            app:title="@string/openvpn_ca" />
+        <EditTextPreference
+            app:dialogLayout="@layout/layout_multiline_dialog"
+            app:icon="@drawable/ic_action_copyright"
+            app:key="clientCertificate"
+            app:title="@string/openvpn_cert" />
+        <EditTextPreference
+            app:dialogLayout="@layout/layout_multiline_dialog"
+            app:icon="@drawable/ic_baseline_vpn_key_24"
+            app:key="clientKey"
+            app:title="@string/openvpn_client_key" />
+        <EditTextPreference
+            app:dialogLayout="@layout/layout_multiline_dialog"
+            app:icon="@drawable/ic_baseline_vpn_key_24"
+            app:key="tlsAuthKey"
+            app:title="@string/openvpn_tls_auth" />
+        <EditTextPreference
+            app:dialogLayout="@layout/layout_multiline_dialog"
+            app:icon="@drawable/ic_baseline_vpn_key_24"
+            app:key="tlsCryptKey"
+            app:title="@string/openvpn_tls_crypt" />
+        <EditTextPreference
+            app:dialogLayout="@layout/layout_multiline_dialog"
+            app:icon="@drawable/ic_baseline_vpn_key_24"
+            app:key="tlsCryptV2Key"
+            app:title="@string/openvpn_tls_crypt_v2" />
+        <moe.manooch.najib4x.ui.SimpleMenuPreference
+            app:defaultValue=""
+            app:entries="@array/openvpn_key_direction_entry"
+            app:entryValues="@array/openvpn_key_direction_value"
+            app:icon="@drawable/ic_baseline_compare_arrows_24"
+            app:key="keyDirection"
+            app:title="@string/openvpn_key_direction"
+            app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/protocol_settings">
+        <EditTextPreference
+            app:icon="@drawable/ic_baseline_compare_arrows_24"
+            app:key="cipher"
+            app:title="@string/openvpn_cipher"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:icon="@drawable/ic_baseline_compare_arrows_24"
+            app:key="auth"
+            app:title="@string/openvpn_auth_digest"
+            app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

@@ -84,6 +84,7 @@ import io.najishab.najibox.ui.profile.HttpSettingsActivity
 import io.najishab.najibox.ui.profile.HysteriaSettingsActivity
 import io.najishab.najibox.ui.profile.MieruSettingsActivity
 import io.najishab.najibox.ui.profile.NaiveSettingsActivity
+import io.najishab.najibox.ui.profile.OpenVpnSettingsActivity
 import io.najishab.najibox.ui.profile.SSHSettingsActivity
 import io.najishab.najibox.ui.profile.ShadowsocksSettingsActivity
 import io.najishab.najibox.ui.profile.SocksSettingsActivity
@@ -537,6 +538,10 @@ class ConfigurationFragment @JvmOverloads constructor(
 
             R.id.action_new_wg -> {
                 startActivity(Intent(requireActivity(), WireGuardSettingsActivity::class.java))
+            }
+
+            R.id.action_new_openvpn -> {
+                startActivity(Intent(requireActivity(), OpenVpnSettingsActivity::class.java))
             }
 
             R.id.action_new_shadowtls -> {

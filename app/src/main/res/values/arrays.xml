@@ -572,4 +572,24 @@
         <item>nb</item>
     </string-array>
 
+    <string-array name="openvpn_protocol_entry">
+        <item>UDP</item>
+        <item>TCP</item>
+    </string-array>
+    <string-array name="openvpn_protocol_value">
+        <item>udp</item>
+        <item>tcp</item>
+    </string-array>
+
+    <string-array name="openvpn_key_direction_entry">
+        <item>@string/plugin_disabled</item>
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+    <string-array name="openvpn_key_direction_value">
+        <item></item>
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+
 </resources>

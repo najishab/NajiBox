@@ -227,6 +227,7 @@
     <string name="action_ssh" translatable="false">SSH</string>
     <string name="action_wireguard" translatable="false">WireGuard</string>
     <string name="action_tuic" translatable="false">TUIC</string>
+    <string name="action_openvpn" translatable="false">OpenVPN</string>
     <string name="proxy_chain">Proxy Chain</string>
     <string name="custom_config">Custom Config</string>
     <string name="balancer">Balancer</string>
@@ -580,4 +581,16 @@
     <string name="minimize">Minimize</string>
     <string name="app_list_permission_denied">Unable to read installed apps.\nThis is usually because the system has restricted app read permissions.\nPlease grant permissions in the system settings.</string>
     <string name="open_app_settings">Open System Settings</string>
+
+    <!-- openvpn -->
+    <string name="openvpn_protocol">Transport Protocol</string>
+    <string name="openvpn_ca">CA Certificate</string>
+    <string name="openvpn_cert">Client Certificate (Optional)</string>
+    <string name="openvpn_client_key">Client Key (Optional)</string>
+    <string name="openvpn_tls_auth">TLS Auth Key (Optional)</string>
+    <string name="openvpn_tls_crypt">TLS Crypt Key (Optional)</string>
+    <string name="openvpn_tls_crypt_v2">TLS Crypt v2 Key (Optional)</string>
+    <string name="openvpn_key_direction">Key Direction</string>
+    <string name="openvpn_cipher">Cipher (Optional)</string>
+    <string name="openvpn_auth_digest">Auth Digest (Optional)</string>
 </resources>

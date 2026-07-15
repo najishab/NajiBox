@@ -486,6 +486,7 @@ data class ProxyEntity(
                 TYPE_ANYTLS -> AnyTLSSettingsActivity::class.java
                 TYPE_CHAIN -> ChainSettingsActivity::class.java
                 TYPE_CONFIG -> ConfigSettingActivity::class.java
+                TYPE_OPENVPN -> OpenVpnSettingsActivity::class.java
                 else -> throw IllegalArgumentException()
             }
         ).apply {
