@@ -32,6 +32,8 @@ import moe.manooch.najib4x.plugin.Plugins
 import moe.manooch.najib4x.proxy.anytls.AnyTLSBean
 import moe.manooch.najib4x.proxy.anytls.buildSingBoxOutboundAnyTLSBean
 import moe.manooch.najib4x.proxy.config.ConfigBean
+import moe.manooch.najib4x.proxy.openvpn.OpenVpnBean
+import moe.manooch.najib4x.proxy.openvpn.buildSingBoxOutboundOpenVpnBean
 import moe.manooch.najib4x.proxy.shadowtls.ShadowTLSBean
 import moe.manooch.najib4x.proxy.shadowtls.buildSingBoxOutboundShadowTLSBean
 import moe.manooch.najib4x.utils.JavaUtil.gson
@@ -364,6 +366,9 @@ fun buildConfig(
 
                         is AnyTLSBean ->
                             buildSingBoxOutboundAnyTLSBean(bean)
+
+                        is OpenVpnBean ->
+                            buildSingBoxOutboundOpenVpnBean(bean)
 
                         else -> throw IllegalStateException("can't reach")
                     }
