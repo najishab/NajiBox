@@ -23,6 +23,8 @@ import libcore.Libcore
 import moe.manooch.najib4x.Protocols
 import moe.manooch.najib4x.proxy.anytls.AnyTLSBean
 import moe.manooch.najib4x.proxy.config.ConfigBean
+import moe.manooch.najib4x.proxy.openvpn.OpenVpnBean
+import moe.manooch.najib4x.proxy.openvpn.parseOpenVpn
 import moe.manooch.najib4x.utils.Util
 import org.ini4j.Config
 import org.ini4j.Ini
@@ -684,6 +686,19 @@ object RawUpdater : GroupUpdater() {
                     if (fileName.isNotBlank()) it.name = fileName.removeSuffix(".conf")
                     it
                 })
+                return proxies
+            } catch (e: Exception) {
+                Logs.w(e)
+            }
+        } else if (fileName.endsWith(".ovpn", ignoreCase = true) ||
+            (Regex("(?m)^\\s*remote\\s+\\S+").containsMatchIn(text) &&
+                    Regex("(?m)^\\s*(dev\\s+tun|dev\\s+tap|client)\\b").containsMatchIn(text))
+        ) {
+            // openvpn
+            try {
+                val bean = parseOpenVpn(text)
+                if (fileName.isNotBlank()) bean.name = fileName.removeSuffix(".ovpn")
+                proxies.add(bean)
                 return proxies
             } catch (e: Exception) {
                 Logs.w(e)

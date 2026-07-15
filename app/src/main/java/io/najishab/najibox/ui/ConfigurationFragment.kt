@@ -109,6 +109,7 @@ import moe.manooch.najib4x.Protocols
 import moe.manooch.najib4x.Protocols.getProtocolColor
 import moe.manooch.najib4x.proxy.anytls.AnyTLSSettingsActivity
 import moe.manooch.najib4x.proxy.config.ConfigSettingActivity
+import moe.manooch.najib4x.proxy.openvpn.OpenVpnBean
 import moe.manooch.najib4x.proxy.shadowtls.ShadowTLSSettingsActivity
 import moe.manooch.najib4x.ui.ConnectionTestNotification
 import okhttp3.internal.closeQuietly
@@ -440,11 +441,27 @@ class ConfigurationFragment @JvmOverloads constructor(
 
     suspend fun import(proxies: List<AbstractBean>) {
         val targetId = DataStore.selectedGroupForImport()
-        for (proxy in proxies) {
+        val openVpnProxies = proxies.filterIsInstance<OpenVpnBean>()
+        val otherProxies = proxies.filter { it !is OpenVpnBean }
+
+        for (proxy in otherProxies) {
             ProfileManager.createProfile(targetId, proxy)
         }
+
+        var editingGroupId = targetId
+        if (openVpnProxies.isNotEmpty()) {
+            val groupName = getString(R.string.action_openvpn)
+            val openVpnGroupId = SagerDatabase.groupDao.allGroups()
+                .find { it.name == groupName }?.id
+                ?: GroupManager.createGroup(ProxyGroup(name = groupName)).id
+            for (proxy in openVpnProxies) {
+                ProfileManager.createProfile(openVpnGroupId, proxy)
+            }
+            editingGroupId = openVpnGroupId
+        }
+
         onMainDispatcher {
-            DataStore.editingGroup = targetId
+            DataStore.editingGroup = editingGroupId
             snackbar(
                 requireContext().resources.getQuantityString(
                     R.plurals.added, proxies.size, proxies.size
